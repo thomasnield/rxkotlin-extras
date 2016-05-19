@@ -8,7 +8,7 @@ import rx.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
 
-inline fun <T> Observable<T>.toListWhile(crossinline condition: (MutableList<in T>, T) -> Boolean) =
+inline fun <T> Observable<T>.toListWhile(crossinline condition: (MutableList<T>, T) -> Boolean) =
          compose(Transformers.toListWhile { l, t -> condition.invoke(l,t)} )
 
 fun <T> Observable<T>.toListUntileChanged() =  compose(Transformers.toListUntilChanged())
@@ -42,3 +42,4 @@ class CollectWhileParams<T,R> {
     fun factory(factory: () -> R) { this.factory = factory }
     fun condition(condition: (R,T) -> Boolean) { this.condition = condition }
 }
+
