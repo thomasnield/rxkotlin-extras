@@ -8,21 +8,14 @@ import rx.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
 
-inline fun <T> Observable<T>.toListWhile(crossinline condition: (MutableList<T>, T) -> Boolean) =
-         compose(Transformers.toListWhile { l, t -> condition.invoke(l,t)} )
+fun <T> Observable<T>.toListWhile(condition: (MutableList<T>, T) -> Boolean): Observable<List<T>> =
+         compose(Transformers.toListWhile(condition))
 
-fun <T> Observable<T>.toListUntileChanged() =  compose(Transformers.toListUntilChanged())
+fun <T> Observable<T>.toListUntilChanged() = compose(Transformers.toListUntilChanged())
 
+fun <T,R: MutableCollection<T>> Observable<T>.collectWhile(factory: (() -> R), action: (R,T) -> Unit, condition: (R,T) -> Boolean) =
+        compose(Transformers.collectWhile(factory,action,condition))
 
-inline fun <T,R: Collection<T>> Observable<T>.collectWhile(crossinline factory: () -> R, crossinline condition: (R, T) -> Boolean) =
-        compose(Transformers.collectWhile({factory.invoke()}, { r,t -> condition.invoke(r,t)}))
-
-
-fun <T,R: Collection<T>> Observable<T>.collectWhile(op: CollectWhileParams<T,R>.() -> Unit): Observable<R> {
-    val params = CollectWhileParams<T,R>()
-    params.op()
-    return this.collectWhile(params.factory!!,params.condition!!)
-}
 
 fun <T> Observable<T>.cache(duration: Long, unit: TimeUnit, worker: Scheduler.Worker) =
         Obs.cache(this,duration,unit,worker)
@@ -30,8 +23,8 @@ fun <T> Observable<T>.cache(duration: Long, unit: TimeUnit, worker: Scheduler.Wo
 fun <T> Observable<T>.cache(duration: Long, unit: TimeUnit, scheduler: Scheduler = Schedulers.computation()) =
         Obs.cache(this,duration,unit,scheduler)
 
-inline fun <T> Observable<T>.doOnNext(n: Int, crossinline action: (T) -> Unit) = compose(Transformers.doOnNext(n,{action.invoke(it)}))
-inline fun <T> Observable<T>.doOnFirst(crossinline action: (T) -> Unit) = compose(Transformers.doOnFirst{ action.invoke(it) })
+fun <T> Observable<T>.doOnNext(n: Int, action: (T) -> Unit) = compose(Transformers.doOnNext(n,action))
+fun <T> Observable<T>.doOnFirst(action: (T) -> Unit) = compose(Transformers.doOnFirst(action))
 fun <R,T> Observable<T>.ignoreElementsThen(next: Observable<R>) = compose(Transformers.ignoreElementsThen(next))
 
 
